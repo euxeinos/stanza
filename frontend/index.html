@@ -1,0 +1,208 @@
+<html lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stihos // Тренажер поэзии</title>
+    <style>
+        /* --- ЦВЕТОВАЯ ПАЛИТРА И БАЗОВЫЕ НАСТРОЙКИ --- */
+        :root {
+            --bg-color: #1a1b26;       /* Глубокий темно-синий (в стиле темы Tokyo Night) */
+            --panel-bg: #24283b;       /* Цвет карточек */
+            --text-color: #a9b1d6;     /* Мягкий светлый текст */
+            --accent-color: #7aa2f7;   /* Спокойный синий для кнопок */
+            --success-color: #9ece6a;  /* Зеленый для правильных ответов */
+            --error-color: #f7768e;    /* Красный для ошибок */
+            --hint-color: #565f89;     /* Серый для второстепенного текста */
+            --font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            padding: 20px;
+        }
+
+        /* --- КАРТОЧКИ И ПАНЕЛИ --- */
+        .card {
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        h1 {
+            color: var(--accent-color);
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 16px;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+
+        /* --- ФОРМЫ И ИНПУТЫ --- */
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--bg-color);
+            border: 1px solid var(--hint-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            font-family: var(--font-family);
+            font-weight: bold;
+            padding: 12px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .divider {
+            margin: 30px 0;
+            border: 0;
+            border-top: 1px dashed var(--hint-color);
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .row button {
+            width: auto;
+        }
+
+        /* --- ЭКРАН ТРЕНАЖЕРА --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .context-box {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 0 6px 6px 0;
+            font-style: italic;
+        }
+
+        .context-label {
+            font-size: 11px;
+            color: var(--hint-color);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        #context-line {
+            font-size: 16px;
+            color: #e0af68; /* Приятный оранжево-желтый оттенок */
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--error-color);
+            text-align: center;
+            animation: shake 0.3s;
+        }
+
+        /* Анимация тряски при ошибке */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>STIHOS // MEMORY_TRAINER</h1>
+
+            <div id="setup-screen">
+                <h2>Вариант А: Новый стих в базу</h2>
+                <input type="text" id="poem-title" placeholder="Название стиха">
+                <textarea id="poem-input" placeholder="Вставьте текст стиха сюда...&#10;Разделяйте строфы пустой строкой."></textarea>
+                <button id="start-btn">Сохранить и начать</button>
+
+                <div class="divider"></div>
+
+                <h2>Вариант Б: Загрузить существующий</h2>
+                <div class="row">
+                    <input type="number" id="poem-id-input" placeholder="ID стиха (например, 1)">
+                    <button id="load-btn">Загрузить</button>
+                </div>
+            </div>
+
+            <div id="training-screen" class="hidden">
+                <div class="context-box">
+                    <div class="context-label">Предыдущая строка (подсказка):</div>
+                    <div id="context-line">Это первая строка, подсказок нет. Начните ввод!</div>
+                </div>
+
+                <h2>Введите следующую строку:</h2>
+                <input type="text" id="user-input" placeholder="Пишите здесь..." autocomplete="off">
+                <button id="check-btn">Проверить (Enter)</button>
+
+                <div id="feedback" class="feedback hidden">✕ Неверно, попробуйте еще раз или вспомните рифму!</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

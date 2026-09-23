@@ -5,6 +5,7 @@ __pycache__/
 # Virtual envs
 .venv/
 venv/
+.uv/
 
 # Tool caches
 .pytest_cache/
@@ -25,3 +26,16 @@ venv/
 
 # macOS
 .DS_Store
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend
+node_modules/
+dist/
+.cache/
+
+# Logs
+*.log
