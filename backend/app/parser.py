@@ -1,4 +1,5 @@
 def parse_poem(raw_text: str) -> list:
+    raw_text = raw_text.replace("\\n", "\n")
     raw_lines = raw_text.splitlines()
     cleaned_lines = [line.strip() for line in raw_lines]
 

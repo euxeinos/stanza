@@ -1,8 +1,10 @@
 # Python
 __pycache__/
 *.py[cod]
+tests/
 
 # Virtual envs
+.venv
 .venv/
 venv/
 .uv/
@@ -36,6 +38,7 @@ venv/
 node_modules/
 dist/
 .cache/
+*.map
 
 # Logs
 *.log

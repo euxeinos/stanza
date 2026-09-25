@@ -13,20 +13,20 @@
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            python311
+            python313
             uv
-            direnv
-            nix-direnv
             httpie
             sqlite
-            pytest
+            taplo
+            nodejs_22
+            typescript
           ];
 
           shellHook = ''
             echo "=================================================="
-            echo "⚡ Nix-shell activated! ⚡"
-            echo "Python:   $(python3 --version)"
-            echo "Poetry:   $(uv --version)"
+            echo "⚡ Nix-shell for STANZA activated! ⚡"
+            echo "🐍 Python: $(python3 --version)"
+            echo "♻️ UV:     $(uv --version)"
             echo "=================================================="
           '';
         };

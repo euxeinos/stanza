@@ -1,3 +1,4 @@
+"use strict";
 // Глобальное состояние приложения в памяти браузера
 let flatLines = [];
 let currentLineIndex = 0;
@@ -110,3 +111,4 @@ function checkAnswer() {
         feedbackEl.classList.remove('hidden');
     }
 }
+//# sourceMappingURL=app.js.map

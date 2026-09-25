@@ -11,15 +11,11 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
-    """
-    Takes all classes from models.py and create tables for them in stanza.db
-    """
+    """ Takes classes in models.py and mirror them in stanza.db """
     Base.metadata.create_all(bind=engine)
 
 def get_db():
-    """
-    Dependency Injection: FastAPI calls this func upon each request to API
-    """
+    """ Dependency Injection: FastAPI calls this func upon each request """
     db = SessionLocal()
     try:
         yield db

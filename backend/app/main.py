@@ -1,47 +1,11 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
 from sqlalchemy.orm import Session
 
 from app.database.connection import init_db, get_db
 from app.database.models import Poem, Stanza, Line
-
-def parse_poem(raw_text: str) -> list:
-    raw_text = raw_text.replace("\\n", "\n")
-
-    raw_lines = raw_text.splitlines()
-    cleaned_lines = [line.strip() for line in raw_lines]
-
-    stanzas = []
-    current_stanza_lines = []
-    line_counter = 1
-    stanza_counter = 1
-
-    for line in cleaned_lines:
-        if line == "":
-            if current_stanza_lines:
-                stanzas.append({
-                    "stanza_id": stanza_counter,
-                    "lines": current_stanza_lines
-                })
-                stanza_counter += 1
-                current_stanza_lines = []
-        else:
-            current_stanza_lines.append({
-                "line_id": line_counter,
-                "text": line
-            })
-            line_counter += 1
-
-    if current_stanza_lines:
-        stanzas.append({
-            "stanza_id": stanza_counter,
-            "lines": current_stanza_lines
-        })
-
-    return stanzas
-
+from app.parser import parse_poem
 
 app = FastAPI(title="STANZA API")
 
@@ -53,6 +17,7 @@ origins = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -68,7 +33,7 @@ class PoemInput(BaseModel):
 
 @app.post("/api/v1/poems")
 def create_poem_endpoint(payload: PoemInput, db: Session = Depends(get_db)):
-    """ Accepts text, parces it and saves its structure to database."""
+    """ Takes text, parces it and saves its structure to database """
 
     parsed_structure = parse_poem(payload.text)
     db_poem = Poem(title=payload.title, author=payload.author)
@@ -103,8 +68,7 @@ def get_poem_endpoint(poem_id: int, db: Session = Depends(get_db)):
     poem = db.query(Poem).filter(Poem.id == poem_id).first()
 
     if not poem:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Poem not found in database")
+        raise HTTPException(status_code=404, detail="Poem not found")
 
     result = []
     for stanza in poem.stanzas:

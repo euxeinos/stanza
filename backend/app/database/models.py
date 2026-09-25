@@ -6,8 +6,8 @@ Base = declarative_base()
 class Poem(Base):
     __tablename__ = "poems"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=True, default="Без названия")
-    author = Column(String, nullable=True, default="Неизвестный автор")
+    title = Column(String, nullable=True, default="Untitled")
+    author = Column(String, nullable=True, default="Unauthored")
     stanzas = relationship("Stanza", back_populates="poem", cascade="all, delete-orphan")
 
 
