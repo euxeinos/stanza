@@ -1,124 +1,84 @@
-// Глобальное состояние приложения в памяти браузера
-let flatLines: { line_id: number; text: string }[] = [];
-let currentLineIndex = 0;
+interface Line {
+    line_id?: number;
+    text: string;
+}
 
-// Элементы DOM
-const setupScreen = document.getElementById('setup-screen')!;
-const trainingScreen = document.getElementById('training-screen')!;
+interface Stanza {
+    stanza_id?: number;
+    lines: Line[];
+}
+
+interface PoemResponse {
+    poem_id: number;
+    title: string;
+    author?: string;
+    stanzas: Stanza[];
+}
+
+interface SaveResult {
+    status: string;
+    poem_id: number;
+    title?: string;
+}
+
+let flatLines: Line[] = [];
+let currentLineIndex: number = 0;
+
+const setupScreen = document.getElementById('setup-screen') as HTMLElement;
+const trainingScreen = document.getElementById('training-screen') as HTMLElement;
+
 const poemInput = document.getElementById('poem-input') as HTMLTextAreaElement;
 const poemTitleInput = document.getElementById('poem-title') as HTMLInputElement;
 const poemIdInput = document.getElementById('poem-id-input') as HTMLInputElement;
 
-const startBtn = document.getElementById('start-btn')!;
-const loadBtn = document.getElementById('load-btn')!;
+const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+const loadBtn = document.getElementById('load-btn') as HTMLButtonElement;
 
-const contextLineEl = document.getElementById('context-line')!;
+const contextLineEl = document.getElementById('context-line') as HTMLElement;
 const userInput = document.getElementById('user-input') as HTMLInputElement;
-const checkBtn = document.getElementById('check-btn')!;
-const feedbackEl = document.getElementById('feedback')!;
+const checkBtn = document.getElementById('check-btn') as HTMLButtonElement;
+const feedbackEl = document.getElementById('feedback') as HTMLElement;
 
-// Функция активации экрана тренажера
-function startTraining(stanzas: any) {
-    // Важнейший момент: бэкенд возвращает иерархию (stanzas -> lines).
-    // Мы превращаем её в плоский список строк для последовательного заучивания.
-    flatLines = stanzas.flatMap((stanza: any) => stanza.lines);
+function startTraining(stanzas: Stanza[]): void {
+    flatLines = stanzas.flatMap((stanza) => stanza.lines);
 
     if (flatLines.length === 0) {
-        alert("В этом стихе нет строк для заучивания!");
+        alert("No lines found");
         return;
     }
 
-    // Переключаем экраны
     setupScreen.classList.add('hidden');
     trainingScreen.classList.remove('hidden');
-
     currentLineIndex = 0;
     showCurrentStep();
 }
 
-// ВАРИАНТ А: Сохранение нового стиха через POST
-startBtn.addEventListener('click', async () => {
-    const text = poemInput.value;
-    const title = poemTitleInput.value || "Без названия";
-    if (!text.trim()) return;
-
-    try {
-        // 1. Отправляем на бэкенд для сохранения в БД
-        const saveResponse = await fetch('http://127.0.0.1:8000/api/v1/poems', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text, title: title, author: "Неизвестный автор" })
-        });
-
-        if (!saveResponse.ok) throw new Error("Не удалось сохранить стих");
-        const saveResult = await saveResponse.json();
-
-        // 2. Сразу же запрашиваем этот стих по полученному id, чтобы убедиться, что он в базе
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/poems/${saveResult.poem_id}`);
-        const poemData = await response.json();
-
-        // 3. Запускаем
-        startTraining(poemData.stanzas);
-
-    } catch (error) {
-        alert(`Ошибка интеграции: ${error}`);
-    }
-});
-
-// ВАРИАНТ Б: Загрузка существующего стиха по ID через GET
-loadBtn.addEventListener('click', async () => {
-    const id = poemIdInput.value;
-    if (!id) return;
-
-    try {
-        // Делаем GET запрос к нашему новому эндпоинту
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/poems/${id}`);
-
-        if (response.status === 404) {
-            alert("Стих с таким ID не найден в базе данных Stihos!");
-            return;
-        }
-        if (!response.ok) throw new Error("Ошибка сервера");
-
-        const poemData = await response.json();
-
-        // Передаем блок stanzas в тренажер
-        startTraining(poemData.stanzas);
-
-    } catch (error) {
-        alert(`Не удалось загрузить стих: ${error}`);
-    }
-});
-
-// --- ЛОГИКА ТРЕНАЖЕРА (Остается прежней) ---
-
-function showCurrentStep() {
+function showCurrentStep(): void {
     userInput.value = '';
     feedbackEl.classList.add('hidden');
 
     if (currentLineIndex === 0) {
-        contextLineEl.textContent = 'Это первая строка, подсказок нет. Начните ввод!';
+        contextLineEl.textContent = 'First line: start typing';
     } else {
         contextLineEl.textContent = flatLines[currentLineIndex - 1].text;
     }
+
     userInput.focus();
 }
 
-checkBtn.addEventListener('click', checkAnswer);
-userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
-
-function checkAnswer() {
+function checkAnswer(): void {
     const expected = flatLines[currentLineIndex].text.toLowerCase().trim();
     const actual = userInput.value.toLowerCase().trim();
 
-    const cleanStr = (s: string) => s.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s+/g, " ");
+  const cleanStr = (s: string): string =>
+    s.replace(/[\p{P}\p{S}]/gu, "").replace(/\s+/g, " ");
 
     if (cleanStr(expected) === cleanStr(actual)) {
         currentLineIndex++;
         if (currentLineIndex < flatLines.length) {
             showCurrentStep();
         } else {
-            alert('Поздравляю! Вы прошли первый цикл заучивания стиха из базы данных!');
+            alert('Congratulations!');
             trainingScreen.classList.add('hidden');
             setupScreen.classList.remove('hidden');
         }
@@ -126,3 +86,59 @@ function checkAnswer() {
         feedbackEl.classList.remove('hidden');
     }
 }
+
+startBtn.addEventListener('click', async () => {
+    const text = poemInput.value;
+    const title = poemTitleInput.value || "Untitled";
+
+    if (!text.trim()) return;
+
+    try {
+        const saveResponse = await fetch('http://127.0.0.1:8000/api/v1/poems', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, title: title, author: "Unknown author" })
+        });
+
+        if (!saveResponse.ok) {
+            throw new Error("Poem not found");
+        }
+
+        const saveResult: SaveResult = await saveResponse.json();
+        const response = await fetch(`http://127.0.0.1:8000/api/v1/poems/${saveResult.poem_id}`);
+        const poemData: PoemResponse = await response.json();
+
+        startTraining(poemData.stanzas);
+    } catch (error) {
+        alert(`Integration error: ${error}`);
+    }
+});
+
+loadBtn.addEventListener('click', async () => {
+    const id = poemIdInput.value;
+    if (!id) return;
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/v1/poems/${id}`);
+        if (response.status === 404) {
+            alert("Poem not found in database");
+            return;
+        }
+        if (!response.ok) {
+            throw new Error("Server error");
+        }
+
+        const poemData: PoemResponse = await response.json();
+        startTraining(poemData.stanzas);
+    } catch (error) {
+        alert(`Unable to upload poem: ${error}`);
+    }
+});
+
+checkBtn.addEventListener('click', checkAnswer);
+
+userInput.addEventListener('keypress', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+        checkAnswer();
+    }
+});

@@ -1,17 +1,18 @@
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stihos // Тренажер поэзии</title>
+    <title>Stanza: Memory Trainer</title>
     <style>
-        /* --- ЦВЕТОВАЯ ПАЛИТРА И БАЗОВЫЕ НАСТРОЙКИ --- */
         :root {
-            --bg-color: #1a1b26;       /* Глубокий темно-синий (в стиле темы Tokyo Night) */
-            --panel-bg: #24283b;       /* Цвет карточек */
-            --text-color: #a9b1d6;     /* Мягкий светлый текст */
-            --accent-color: #7aa2f7;   /* Спокойный синий для кнопок */
-            --success-color: #9ece6a;  /* Зеленый для правильных ответов */
-            --error-color: #f7768e;    /* Красный для ошибок */
-            --hint-color: #565f89;     /* Серый для второстепенного текста */
+            --bg-color: #1a1b26;
+            --panel-bg: #24283b;
+            --text-color: #a9b1d6;
+            --accent-color: #7aa2f7;
+            --success-color: #9ece6a;
+            --error-color: #f7768e;
+            --hint-color: #565f89;
             --font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
         }
 
@@ -33,7 +34,6 @@
             padding: 20px;
         }
 
-        /* --- КАРТОЧКИ И ПАНЕЛИ --- */
         .card {
             background-color: var(--panel-bg);
             border-radius: 8px;
@@ -57,7 +57,6 @@
             margin-bottom: 15px;
         }
 
-        /* --- ФОРМЫ И ИНПУТЫ --- */
         input[type="text"], input[type="number"], textarea {
             width: 100%;
             box-sizing: border-box;
@@ -124,7 +123,6 @@
             width: auto;
         }
 
-        /* --- ЭКРАН ТРЕНАЖЕРА --- */
         .hidden {
             display: none !important;
         }
@@ -148,7 +146,7 @@
 
         #context-line {
             font-size: 16px;
-            color: #e0af68; /* Приятный оранжево-желтый оттенок */
+            color: #e0af68;
         }
 
         .feedback {
@@ -159,7 +157,6 @@
             animation: shake 0.3s;
         }
 
-        /* Анимация тряски при ошибке */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -171,34 +168,34 @@
 
     <div class="container">
         <div class="card">
-            <h1>STIHOS // MEMORY_TRAINER</h1>
+            <h1>STANZA: memorize your favorite text</h1>
 
             <div id="setup-screen">
-                <h2>Вариант А: Новый стих в базу</h2>
-                <input type="text" id="poem-title" placeholder="Название стиха">
-                <textarea id="poem-input" placeholder="Вставьте текст стиха сюда...&#10;Разделяйте строфы пустой строкой."></textarea>
-                <button id="start-btn">Сохранить и начать</button>
+                <h2>Add new text to memorize:</h2>
+                <input type="text" id="poem-title" placeholder="Title">
+                <textarea id="poem-input" placeholder="Paste text here...&#10;Separate stanzas with a blank line."></textarea>
+                <button id="start-btn">Save and Start</button>
 
                 <div class="divider"></div>
 
-                <h2>Вариант Б: Загрузить существующий</h2>
+                <h2>Load from archive:</h2>
                 <div class="row">
-                    <input type="number" id="poem-id-input" placeholder="ID стиха (например, 1)">
-                    <button id="load-btn">Загрузить</button>
+                    <input type="number" id="poem-id-input" placeholder="Text ID (e.g. 1)">
+                    <button id="load-btn">Load</button>
                 </div>
             </div>
 
             <div id="training-screen" class="hidden">
                 <div class="context-box">
-                    <div class="context-label">Предыдущая строка (подсказка):</div>
-                    <div id="context-line">Это первая строка, подсказок нет. Начните ввод!</div>
+                    <div class="context-label">Previous line (hint):</div>
+                    <div id="context-line">First line: no hints. Start typing!</div>
                 </div>
 
-                <h2>Введите следующую строку:</h2>
-                <input type="text" id="user-input" placeholder="Пишите здесь..." autocomplete="off">
-                <button id="check-btn">Проверить (Enter)</button>
+                <h2>Enter the next line:</h2>
+                <input type="text" id="user-input" placeholder="Type here..." autocomplete="off">
+                <button id="check-btn">Check (Enter)</button>
 
-                <div id="feedback" class="feedback hidden">✕ Неверно, попробуйте еще раз или вспомните рифму!</div>
+                <div id="feedback" class="feedback hidden">✕ Incorrect, try again or recall the rhyme!</div>
             </div>
         </div>
     </div>
